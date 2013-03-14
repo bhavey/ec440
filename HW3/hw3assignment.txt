@@ -1,0 +1,24 @@
+---------------- HW 3 Assignment -----------------
+
+Your homework this time is to build a server that listens on a socket, accepts a connection and creates a thread to respond to the connection.  The server should:
+
+* Thus the server should be multithreaded -- ie it responds to a request by launching a thread to do the work
+* Get your server to work on the RPi
+* Test by connecting to your server from another machine
+
+The homework has 2 levels.  The 'base' level is good for 70% credit.  The advanced options for 30% more (and for fun)
+
+* Base option to try: when you connect to the server it should transmit back to you the last 30 lines from the system log file (what you would get from dmesg).  This can be fully automated so that the client does not need to do anything but connect and the server thread is done after sending the response.
+   *  Advanced options -- have the server respond to requests from the client:
+       *  suggestion 1: client sends a regexp (regular expression)  and the server responds with matching lines from the log file.
+       *  general advanced option: have the server do something interesting in response to commands of your choice. :-)
+
+
+There are a number of tutorial and examples on how to get linux sockets to work properly.  Here are two examples:
+
+*  http://www.thegeekstuff.com/2011/12/c-socket-programming/
+*  http://www.linuxhowtos.org/C_C++/socket.htm   Code for this example does seem to run as written on RPI and is attached.
+
+The system logging is controlled by systemd.  See:
+
+*  http://www.manned.org/dmesg.1  dmesg command: prints the logfile to stdout
