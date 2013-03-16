@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <time.h>
 
+void *thread_run(void * arg);
 //Displays errors when a system call fails.
 void error(const char *msg) {
     perror(msg);
@@ -33,7 +34,6 @@ int main(int argc, char *argv[]) {
     //serv_addr contains the address of the server.
     //cli_addr contains the address of the client.
 
-    int n;
     //Checks to see if there was a provided port.
     if (argc < 2) {
         fprintf(stderr,"ERROR, no port provided\n");
@@ -67,20 +67,43 @@ int main(int argc, char *argv[]) {
     //Start listening for requests to the serer through the socket descriptor.
     listen(sockfd,5);
 
-    //Multithread the code at this part!
     clilen = sizeof(cli_addr);
-    newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr,&clilen);
-    if (newsockfd < 0)
-        error("ERROR on accept");
-    bzero(buffer,256);
-    n = read(newsockfd,buffer,255);
-    if (n < 0)
-        error("ERROR reading from socket");
-    printf("Here is the message: %s\n",buffer);
-    n = write(newsockfd,"I got your message",18);
-    if (n < 0)
-        error("ERROR writing to socket");
+    //Multithread the code at this part!
+    while (1) {
+        printf("Initiated server.\n");
+        addr_len = sizeof(cli_addr);
+        newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr,&clilen);
+        if (newsockfd < 0) {
+            error("ERROR on accept");
+            close(newsockfd);
+            close(sockfd);
+        }
+//HERE IS WHERE WE GO.
+    }
     close(newsockfd);
     close(sockfd);
     return 0;
+}
+
+void *thread_run(void * arg) {
+    char buff_in[512];
+    char buff_out[512];
+    client_s = *(unsigned int *)arg;
+
+//The old code is here!
+    int n;
+    bzero(buffer,256);
+    n = read(newsockfd,buffer,255);
+    if (n < 0) {
+        error("ERROR reading from socket");
+        close(newsockfd);
+        close(sockfd);
+    }
+    printf("Here is the message from the client: %s",buffer);
+    n = write(newsockfd,"I got your message",18);
+    if (n < 0) {
+        error("ERROR writing to socket");
+        close(newsockfd);
+        close(sockfd);
+    }
 }
