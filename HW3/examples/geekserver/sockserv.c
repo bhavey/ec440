@@ -1,3 +1,5 @@
+//Stolen from:
+//http://www.thegeekstuff.com/2011/12/c-socket-programming/
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -9,14 +11,19 @@
 #include <sys/types.h>
 #include <time.h>
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int listenfd = 0, connfd = 0;
+    //The sockaddr_in and serv_addr structures are defined in <sys/socket.h>
     struct sockaddr_in serv_addr;
 
+    //This is the communication buffer.
     char sendBuff[1025];
     time_t ticks;
 
+    //Socket function declared as: socket(domain,type,protocol);
+    //Domain: AF_INET represents IPv4 and AF_INET6 is IPv6
+    //Type: SOCK_STREAM is TCP, others are *_DGRAM, *_SEQPACKET, *_RAW
+    //Protocol: IPPROTO_TCP, *_SCTP, *_UDP, *_DCCP. 0 is the default for domain/type
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));
     memset(sendBuff, '0', sizeof(sendBuff));
@@ -29,8 +36,7 @@ int main(int argc, char *argv[])
 
     listen(listenfd, 10);
 
-    while(1)
-    {
+    while(1) {
         connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
 
         ticks = time(NULL);
