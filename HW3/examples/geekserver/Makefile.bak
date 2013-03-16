@@ -1,0 +1,4 @@
+#-lpthread flag needed if using pthreads
+all:
+    gcc sockserv.c -o server.out
+    gcc sockcli.c -o client.out

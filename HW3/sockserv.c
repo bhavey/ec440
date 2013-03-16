@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
         //at which point connfd is set to the descriptor of the client socket
         connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
 
+        printf("Server request from: %s\n","this");
         //Find the time.
         ticks = time(NULL);
         //print the time time to the sendbuffer.
