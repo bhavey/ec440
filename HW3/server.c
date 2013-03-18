@@ -20,6 +20,10 @@ int main(int argc, char *argv[]) {
     sleep_time.tv_sec=0;
     sleep_time.tv_nsec=100000000;
 
+    pthread_attr_t attr;
+    pthread_t threads;
+    unsigned int ids;
+
     int sockfd, newsockfd, portno;
     socklen_t clilen;
     char buffer[256];
@@ -69,16 +73,17 @@ int main(int argc, char *argv[]) {
 
     clilen = sizeof(cli_addr);
     //Multithread the code at this part!
+    pthread_attr_init(&attr);
+    printf("Initiated server.\n");
     while (1) {
-        printf("Initiated server.\n");
-        addr_len = sizeof(cli_addr);
         newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr,&clilen);
         if (newsockfd < 0) {
             error("ERROR on accept");
             close(newsockfd);
-            close(sockfd);
-        }
-//HERE IS WHERE WE GO.
+        } else {
+            ids = newsockfd;
+            pthread_create(&threads,&attr,thread_run,&ids);
+       }
     }
     close(newsockfd);
     close(sockfd);
@@ -86,24 +91,31 @@ int main(int argc, char *argv[]) {
 }
 
 void *thread_run(void * arg) {
-    char buff_in[512];
-    char buff_out[512];
-    client_s = *(unsigned int *)arg;
-
-//The old code is here!
+    char buffer[256];
     int n;
+    int newsockfd;
+    //copy over the client handler.
+    newsockfd = *(unsigned int *)arg;
+
+    //The old code is imported to here!
     bzero(buffer,256);
+    //read in the buffer.
     n = read(newsockfd,buffer,255);
+    //Error reading :/
     if (n < 0) {
         error("ERROR reading from socket");
         close(newsockfd);
-        close(sockfd);
     }
+    //prints the code to the console.
     printf("Here is the message from the client: %s",buffer);
+
+    //Let it know everything is fine.
     n = write(newsockfd,"I got your message",18);
+    //or maybe not...
     if (n < 0) {
         error("ERROR writing to socket");
         close(newsockfd);
-        close(sockfd);
     }
+    //we're done here.
+    close(newsockfd);
 }
