@@ -16,7 +16,7 @@ void *thread_run(void *arg) {
     char buffer[BUF_SIZE];
     char bigbuf[2048];
 //    char bigbuf[65536];
-    int n, newsockfd;
+    int i, n, newsockfd;
     int dmesg;
     //copy over the client handler
     newsockfd = *(unsigned int *)arg;
@@ -43,7 +43,34 @@ void *thread_run(void *arg) {
     }
 
     if (dmesg) { //execute dmesg.
-
+        int log_size=0;
+        FILE *fp;
+        fp = fopen("/var/log/kernel.log","r");
+        if (fp == NULL) {
+            printf("Could not find system log files.\n");
+            n = write(newsockfd,"Could not find system log files.\n",sizeof("Could not find system log files.\n"));
+            close(newsockfd);
+            return 0;
+        } else {
+            while (1) { //get the file size!
+                fgets (bigbuf,2048,fp);
+                if (!feof(fp))
+                    log_size++;
+                else
+                    break;
+            }
+            fclose(fp);
+            fp = fopen("/var/log/kernel.log","r");
+            while (1) {
+                fgets (buffer,2048,fp);
+                if (!feof(fp)) {
+                    if (i > log_size-30)
+                        n = write(newsockfd, buffer, sizeof(buffer));
+                    i++;
+                } else
+                    break;
+            }
+        }
     } else {
         n = write(newsockfd,"You requested an FTP print",sizeof("You requested an FTP print"));
     }
