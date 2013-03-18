@@ -8,13 +8,15 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 
-#define BUF_SIZE 256
+#ifndef BUF_SIZE
+#define BUF_SIZE 65536
+
 void error(const char*);
 
 //This runs the server and send the correct data back.
 void *thread_run(void *arg) {
     char buffer[BUF_SIZE];
-    char bigbuf[2048];
+    char bigbuf[BUF_SIZE];
 //    char bigbuf[65536];
     int i, n, newsockfd;
     int dmesg;
@@ -43,34 +45,22 @@ void *thread_run(void *arg) {
     }
 
     if (dmesg) { //execute dmesg.
-        int log_size=0;
-        FILE *fp;
-        fp = fopen("/var/log/kernel.log","r");
-        if (fp == NULL) {
-            printf("Could not find system log files.\n");
-            n = write(newsockfd,"Could not find system log files.\n",sizeof("Could not find system log files.\n"));
-            close(newsockfd);
-            return 0;
-        } else {
-            while (1) { //get the file size!
-                fgets (bigbuf,2048,fp);
-                if (!feof(fp))
-                    log_size++;
-                else
-                    break;
-            }
-            fclose(fp);
-            fp = fopen("/var/log/kernel.log","r");
-            while (1) {
-                fgets (buffer,2048,fp);
-                if (!feof(fp)) {
-                    if (i > log_size-30)
-                        n = write(newsockfd, buffer, sizeof(buffer));
-                    i++;
-                } else
-                    break;
-            }
+        pid_t pid;
+        char *tailCmd[] = {"tail","-n","30","/var/log/kernel.log",0}; //Equiv to dmesg
+
+        if ((pid = fork()) < 0) //Fork Error
+            printf("Error Forking\n",sizeof("Error Forking\n"));
+        else if (pid ==  0) { //child process! Run that shit.
+            setbuf(stdout, bigbuf); //stdout goes to bigbuf now.
+            execvp(tailCmd[0],tailCmd); //Now run dmesg clone command!
+        } else { //Parent process.
+            pid_t childPid;
+            int status;
+            childPid = wait(&status); //wait for tail to finish.
+            fclose(stdout);
         }
+//        strncpy (buffer,bigbuf,255);
+        n = write(newsockfd,bigbuf,sizeof(bigbuf));
     } else {
         n = write(newsockfd,"You requested an FTP print",sizeof("You requested an FTP print"));
     }
@@ -83,3 +73,4 @@ void *thread_run(void *arg) {
     close(newsockfd);
     return 0;
 }
+#endif

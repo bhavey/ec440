@@ -6,13 +6,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <time.h>
+#include "thread_run.c"
+#include "error.c"
 
+#define BUF_SIZE 65536
+
+void error(const char*);
 void *thread_run(void * arg);
-//Displays errors when a system call fails.
-void error(const char *msg) {
-    perror(msg);
-    exit(1);
-}
 
 int main(int argc, char *argv[]) {
     //Creates a sleep time. Server will only accept new requests every 1/10 of a second
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
     int sockfd, newsockfd, portno;
     socklen_t clilen;
-    char buffer[256];
+    char buffer[BUF_SIZE];
     //The sockaddr_in and serv_addr structures are defined in <sys/socket.h>
     struct sockaddr_in serv_addr, cli_addr;
     //sockaddr_in contains sin_family, it needs to be AF_INET
@@ -88,42 +88,4 @@ int main(int argc, char *argv[]) {
     close(newsockfd);
     close(sockfd);
     return 0;
-}
-
-void *thread_run(void * arg) {
-    char buffer[256];
-    int n;
-    int newsockfd;
-    //copy over the client handler.
-    newsockfd = *(unsigned int *)arg;
-
-    //The old code is imported to here!
-    bzero(buffer,256);
-    //read in the buffer.
-    n = read(newsockfd,buffer,255);
-    //Error reading :/
-    if (n < 0) {
-        error("ERROR reading from socket");
-        close(newsockfd);
-    }
-
-    //Checks if it's calling for dmesg or for print
-    if ((strncmp(buffer,"dmesg",5)==0) && ((int)strlen(buffer)==6)) {
-        printf("Got a dmesg\n");
-    } else {
-        printf("Here is the message from the client: %s",buffer);
-    }
-    //Let it know everything is fine.
-    if ((strncmp(buffer,"dmesg",5)==0) && ((int)strlen(buffer)==6)) {
-        n = write(newsockfd,"You asked for dmesg",19);
-    } else {
-        n = write(newsockfd,"You sent a message",18);
-    }
-    //or maybe not...
-    if (n < 0) {
-        error("ERROR writing to socket");
-        close(newsockfd);
-    }
-    //we're done here.
-    close(newsockfd);
 }
