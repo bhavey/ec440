@@ -43,23 +43,7 @@ void *thread_run(void *arg) {
     }
 
     if (dmesg) { //execute dmesg.
-        pid_t pid;
-        char *dmesgCmd[] = {"dmesg",0}; //Command corresponding to dmesg.
 
-        if ((pid = fork()) < 0) //Fork Error
-            printf("Error Forking\n",sizeof("Error Forking\n"));
-        else if (pid==0) { //Child process. Execute dmesg!
-            //freopen("/dev/null", "a", stdout);
-            setbuf(stdout, bigbuf); //stdout now goes to bigbuf.
-            execvp(dmesgCmd[0],dmesgCmd); //Now run dmesg!
-        } else { //Parent process
-            pid_t childPid;
-            int status;
-            childPid = wait(&status); //wait until dmesg is done.
-            fclose (stdout);
-        }
-        strncpy (buffer,bigbuf,255);
-        n = write(newsockfd,buffer,sizeof(buffer));
     } else {
         n = write(newsockfd,"You requested an FTP print",sizeof("You requested an FTP print"));
     }
