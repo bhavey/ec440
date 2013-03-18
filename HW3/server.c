@@ -106,11 +106,19 @@ void *thread_run(void * arg) {
         error("ERROR reading from socket");
         close(newsockfd);
     }
-    //prints the code to the console.
-    printf("Here is the message from the client: %s",buffer);
 
+    //Checks if it's calling for dmesg or for print
+    if ((strncmp(buffer,"dmesg",5)==0) && ((int)strlen(buffer)==6)) {
+        printf("Got a dmesg\n");
+    } else {
+        printf("Here is the message from the client: %s",buffer);
+    }
     //Let it know everything is fine.
-    n = write(newsockfd,"I got your message",18);
+    if ((strncmp(buffer,"dmesg",5)==0) && ((int)strlen(buffer)==6)) {
+        n = write(newsockfd,"You asked for dmesg",19);
+    } else {
+        n = write(newsockfd,"You sent a message",18);
+    }
     //or maybe not...
     if (n < 0) {
         error("ERROR writing to socket");
