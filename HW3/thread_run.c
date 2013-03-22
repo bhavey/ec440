@@ -17,7 +17,6 @@ void error(const char*);
 void *thread_run(void *arg) {
     char buffer[BUF_SIZE];
     char bigbuf[BUF_SIZE];
-//    char bigbuf[65536];
     int i, n, newsockfd;
     int dmesg;
     //copy over the client handler
@@ -59,10 +58,22 @@ void *thread_run(void *arg) {
             childPid = wait(&status); //wait for tail to finish.
             fclose(stdout);
         }
-//        strncpy (buffer,bigbuf,255);
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     } else {
-        n = write(newsockfd,"You requested an FTP print",sizeof("You requested an FTP print"));
+        pid_t pid;
+        char *ftpCmd[] = {"tail","-n","30","/var/log/kernel.log",0}; //Equiv to dmesg
+        if ((pid = fork()) < 0) //Fork Error
+            printf("Error Forking\n",sizeof("Error Forking\n"));
+        else if (pid ==  0) { //child process! Run that shit.
+            setbuf(stdout, bigbuf); //stdout goes to bigbuf now.
+            execvp(ftpCmd[0],ftpCmd); //Now run dmesg clone command!
+        } else { //Parent process.
+            pid_t childPid;
+            int status;
+            childPid = wait(&status); //wait for tail to finish.
+            fclose(stdout);
+        }
+        n = write(newsockfd,bigbuf,sizeof(bigbuf));
     }
     //Make sure we were able to write to the socket.
     if (n < 0) {

@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
     serv_addr.sin_port = htons(portno);
 
     //Bind the server address to the socket descriptor. Check if it was acceptable.
+//    bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
         error("ERROR on binding");
     //Start listening for requests to the serer through the socket descriptor.
