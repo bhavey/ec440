@@ -53,25 +53,24 @@ void *thread_run(void *arg) {
             setbuf(stdout, bigbuf); //stdout goes to bigbuf now.
             execvp(tailCmd[0],tailCmd); //Now run dmesg clone command!
         } else { //Parent process.
+            fclose(stdout);
             pid_t childPid;
             int status;
             childPid = wait(&status); //wait for tail to finish.
-            fclose(stdout);
         }
-        n = write(newsockfd,bigbuf,sizeof(bigbuf));
+      n = write(newsockfd,bigbuf,sizeof(bigbuf));
     } else {
         pid_t pid;
-        char *ftpCmd[] = {"tail","-n","30","/var/log/kernel.log",0}; //Equiv to dmesg
+        char *ftpCmd[] = {"/bin/bash","write_message.sh",buffer,0}; //Equiv to dmesg
+//        char *ftpCmd[] = {"/bin/bash","ftp.sh",0}; //Equiv to dmesg
         if ((pid = fork()) < 0) //Fork Error
             printf("Error Forking\n",sizeof("Error Forking\n"));
         else if (pid ==  0) { //child process! Run that shit.
-            setbuf(stdout, bigbuf); //stdout goes to bigbuf now.
             execvp(ftpCmd[0],ftpCmd); //Now run dmesg clone command!
         } else { //Parent process.
             pid_t childPid;
             int status;
             childPid = wait(&status); //wait for tail to finish.
-            fclose(stdout);
         }
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     }
