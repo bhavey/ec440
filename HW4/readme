@@ -1,0 +1,16 @@
+Simply run "Make" to compile the code.
+server PORT to start the server. Defaults to your IP at port PORT
+client IP PORT connects to a server at IP on port PORT.
+Type "dmesg" twice to displace the dmesg (server needs to be initialized)
+type a message and it will post to a website, if ftp.sh has been properly configured
+NOTE: dmesg/website posting must run on two different servers.
+Running dmesg then another string, or a string followed by dmesg, will break things.
+This is inconsequential, as the server would only need to run one of these at any given time.
+
+--------------To configure ftp.sh: ---------------------------
+The ftp.sh file needs a username, password, and host to work.
+If you don't have access to a website, just let me know and
+I can work along with you to prove it works. (I'd be willing to
+demo it again)
+
+-Benjamin Havey
