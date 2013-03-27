@@ -1,4 +1,5 @@
-This homework is an extension/elaboration of the previous server problem.  This week, you will build a multithreaded server using pthreads and a client to go with it.
+This homework is an extension/elaboration of the previous server problem. This week, you
+  will build a multithreaded server using pthreads and a client to go with it.
 
  *Each client should connect and send some number of lines each of which contains a positive
    integer, terminated by a blank line.
