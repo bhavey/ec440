@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
         error("ERROR connecting");
-    printf("Please type in as many numbers as you want. They must be positive integers, and followed by a return. Any non-numeral characters will be ignored. Press enter to finish.\n");
+    printf("Please type in as many numbers as you want. They must be positive integers, and followed by a return. Any non-numeral characters will be ignored. Spaces will be considered new numbers. Press enter on a blank line to finish, type 'exit' to terminated the connection and do nothing.\n");
     int flipvar=1;
     int j=0;
     while (flipvar) {
@@ -59,11 +59,19 @@ int main(int argc, char *argv[]) {
         for (i=0; i<strlen(buffer); i++) {
             if (isdigit(buffer[i])) {
                 tmpbuf[j]=buffer[i];
-                j++;
+                if (tmpbuf[j]!='0') //remove leading zeros.
+                    j++;
+            }
+            if (buffer[i]==' ') {
+                tmpbuf[j]='\0';
+                if (strlen(tmpbuf)>0)
+                    sprintf(outbuf,"%s %s",outbuf,tmpbuf);
+                j=0;
+                tmpbuf[0]='\0';
             }
         }
         tmpbuf[j]='\0';
-        printf("Number: %s\n",tmpbuf);
+//        printf("Number: %s\n",tmpbuf);
         if ((strlen(outbuf)+strlen(tmpbuf)+3)>BUF_SIZE) {
             printf("The current selection exceeds the server transfer limit. Either press enter to send the current numbers, or type exit to leave without sending anything.\n");
             continue;
@@ -72,8 +80,8 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Final string: %s.\n",outbuf);
-    return 0;
-    n = write(sockfd,buffer,strlen(buffer));
+
+    n = write(sockfd,outbuf,strlen(outbuf));
     if (n < 0)
         error("ERROR writing to socket");
     bzero(buffer,BUF_SIZE);
