@@ -14,11 +14,12 @@
 #define BUF_SIZE 65536
 
 int main(int argc, char *argv[]) {
-    int sockfd, portno, n;
+    int sockfd, portno, n, i;
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
     char buffer[BUF_SIZE];
+    char tmpbuf[BUF_SIZE];
     char outbuf[BUF_SIZE]="0";
 
     if (argc < 3) {
@@ -41,25 +42,35 @@ int main(int argc, char *argv[]) {
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
         error("ERROR connecting");
-    printf("Please type in as many numbers as you want. They must be positive integers, and followed by an enter. Any non-numeral characters will be ignored. Press enter to finish.\n");
+    printf("Please type in as many numbers as you want. They must be positive integers, and followed by a return. Any non-numeral characters will be ignored. Press enter to finish.\n");
     int flipvar=1;
+    int j=0;
     while (flipvar) {
+        j=0;
         bzero(buffer,BUF_SIZE);
+        bzero(tmpbuf,BUF_SIZE);
         fgets(buffer,BUF_SIZE-1,stdin);
-        printf("Number: %s",buffer);
-        flipvar=strcmp(buffer,"\n");
+        flipvar=strcmp(buffer,"\n"); //Break after newline is sent down the line!
         if (!strcmp(buffer,"exit\n")||!strcmp(buffer,"Exit\n")) {
             printf("Exit signal sent to server.\n");
             sprintf(outbuf,"ABORT"); //The server reads this as a "no add"
             break;
         }
-        buffer[strlen(buffer)-1]='\0';
-        if ((strlen(outbuf)+strlen(buffer)+3)>BUF_SIZE) {
+        for (i=0; i<strlen(buffer); i++) {
+            if (isdigit(buffer[i])) {
+                tmpbuf[j]=buffer[i];
+                j++;
+            }
+        }
+        tmpbuf[j]='\0';
+        printf("Number: %s\n",tmpbuf);
+        if ((strlen(outbuf)+strlen(tmpbuf)+3)>BUF_SIZE) {
             printf("The current selection exceeds the server transfer limit. Either press enter to send the current numbers, or type exit to leave without sending anything.\n");
             continue;
         }
-        sprintf(outbuf,"%s %s",outbuf,buffer);
+        sprintf(outbuf,"%s %s",outbuf,tmpbuf);
     }
+
     printf("Final string: %s.\n",outbuf);
     return 0;
     n = write(sockfd,buffer,strlen(buffer));
