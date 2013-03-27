@@ -1,0 +1,14 @@
+This homework is an extension/elaboration of the previous server problem.  This week, you will build a multithreaded server using pthreads and a client to go with it.
+
+ *Each client should connect and send some number of lines each of which contains a positive
+   integer, terminated by a blank line.
+ *The server should create a thread when the client connects and that thread should sum up
+   all the integers sent by the client and send the sum to the client.
+ *In addition, the server should send each client a second line that reads: "The current
+   Grand Total is XXXXX and I have served YYYYY clients so far!",where the number
+   XXXXX is the sum of the totals for ALL clients served and YYYYY is the total number
+   of client requests.
+            
+NOTE: computing the grand total and client total requires using shared memory among the threads
+AND synchronization to avoid errors.
+See also the LLNL POSIX Threads Tutorial for examples
