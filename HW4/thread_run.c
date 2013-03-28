@@ -13,13 +13,16 @@
 
 void error(const char*);
 
-//This runs the server and send the correct data back.
+//This runs the thread and sends the sum back.
 void *thread_run(void *arg) {
     char buffer[BUF_SIZE];
     char bigbuf[BUF_SIZE];
-    int i, n, newsockfd;
+    char *pch;
+    int i, j, n, newsockfd;
     int abort;
-    int addvars[10000];
+    int small_sum;
+    int addvals[10000];
+    int tot_vals;
     //copy over the client handler
     newsockfd = *(unsigned int *)arg;
     //Initialize the buffer to 0.
@@ -27,12 +30,14 @@ void *thread_run(void *arg) {
 
     //Read in the buffer.
     n = read(newsockfd,buffer,BUF_SIZE);
+
     //Error reading :/
     if (n<0) {
         error("ERROR reading from socket");
         close(newsockfd);
     }
-
+    //Lock the thread so variables can't be messed around with.
+    pthread_mutex_lock (&runsum);
     //This checks if a call is being made for ABORT or for sum.
     if ((strcmp(buffer,"ABORT")==0)) {
         abort=1; //called for abort
@@ -44,13 +49,30 @@ void *thread_run(void *arg) {
     }
     printf("String: %s\n",buffer);
 
+    small_sum=0;
     if (abort) { //execute abort request, send nothing to client.
         sprintf(bigbuf,"Recieved your request for abort. Nothing done.\n");
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     } else {
+        i=0;
+        pch = strtok(buffer, " ");
+        while (pch != NULL) {
+            printf("%s, ",pch);
+            addvals[i]=atoi(pch);
+            i++;
+            pch = strtok (NULL, " ");
+        }
+        tot_vals=i;
+        i=0;
+        for (i=0; i<tot_vals; i++)
+            small_sum+=addvals[i];
+        sum_struct.sum+=small_sum;
+        printf("\n");
         sprintf(bigbuf,"Server got your request for a sum!\n");
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     }
+    printf("Sum: %d\n",sum_struct.sum);
+    printf("Client calls: %d\n",sum_struct.client_calls);
     //Make sure we were able to write to the socket.
     if (n < 0) {
         error("ERROR writing to socket");
@@ -58,6 +80,8 @@ void *thread_run(void *arg) {
     }
     //We're done here...
     close(newsockfd);
+    pthread_mutex_unlock (&runsum);
+    pthread_exit((void*) 0);
     return 0;
 }
 #endif

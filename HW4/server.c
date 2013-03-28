@@ -17,16 +17,16 @@ struct ext_struct sum_struct;
 
 void error(const char*);
 void *thread_run(void * arg);
+pthread_mutex_t runsum;
 
 int main(int argc, char *argv[]) {
     pthread_attr_t attr;
     pthread_t threads;
-    pthread_mutex_t runsum;
 //    pthread_mutex_t totcli;
     unsigned int ids;
 
     sum_struct.sum=0;
-    sum_struct.client_calls=1;
+    sum_struct.client_calls=0;
     int sockfd, newsockfd, portno;
     socklen_t clilen;
     char buffer[BUF_SIZE];
@@ -74,8 +74,6 @@ int main(int argc, char *argv[]) {
             ids = newsockfd;
             pthread_create(&threads, &attr, thread_run, &ids);
         }
-        printf("Sum: %d\n",sum_struct.sum);
-        printf("Client calls: %d\n",sum_struct.client_calls);
     }
     close(newsockfd);
     close(sockfd);

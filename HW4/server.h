@@ -6,5 +6,6 @@ struct ext_struct {
     int sum;
 };
 
+extern pthread_mutex_t runsum;
 extern struct ext_struct sum_struct;
 #endif
