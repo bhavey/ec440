@@ -2,6 +2,7 @@
 #define FILE__H
 struct ext_struct {
     int  *in;
+    int client_calls;
     int sum;
 };
 

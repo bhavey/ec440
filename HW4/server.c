@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <time.h>
+#include <pthread.h>
 #include "thread_run.c"
 #include "error.h"
 #include "server.h"
@@ -20,9 +21,12 @@ void *thread_run(void * arg);
 int main(int argc, char *argv[]) {
     pthread_attr_t attr;
     pthread_t threads;
+    pthread_mutex_t runsum;
+//    pthread_mutex_t totcli;
     unsigned int ids;
 
-    sum_struct.sum=1;
+    sum_struct.sum=0;
+    sum_struct.client_calls=1;
     int sockfd, newsockfd, portno;
     socklen_t clilen;
     char buffer[BUF_SIZE];
@@ -54,7 +58,12 @@ int main(int argc, char *argv[]) {
 
     clilen = sizeof(cli_addr);
     //Multithread the code at this part!
+
+    pthread_mutex_init(&runsum, NULL);
+
     pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
     printf("Initiated server.\n");
     while (1) {
         newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr,&clilen);
@@ -63,11 +72,14 @@ int main(int argc, char *argv[]) {
             close(newsockfd);
         } else {
             ids = newsockfd;
-            pthread_create(&threads,&attr,thread_run,&ids);
-       }
-       printf("Sum: %d\n",sum_struct.sum);
+            pthread_create(&threads, &attr, thread_run, &ids);
+        }
+        printf("Sum: %d\n",sum_struct.sum);
+        printf("Client calls: %d\n",sum_struct.client_calls);
     }
     close(newsockfd);
     close(sockfd);
+    pthread_mutex_destroy(&runsum);
+    pthread_exit(NULL);
     return 0;
 }

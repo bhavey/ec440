@@ -22,7 +22,6 @@ void *thread_run(void *arg) {
     int addvars[10000];
     //copy over the client handler
     newsockfd = *(unsigned int *)arg;
-
     //Initialize the buffer to 0.
     bzero(buffer,BUF_SIZE);
 
@@ -39,6 +38,7 @@ void *thread_run(void *arg) {
         abort=1; //called for abort
         printf("Got a request for Abort, add nothing, print abort message...\n");
     } else { //Call for a sum.
+        sum_struct.client_calls++;
         abort=0;
         printf("Got a request for a sum.\n");
     }
@@ -48,7 +48,7 @@ void *thread_run(void *arg) {
         sprintf(bigbuf,"Recieved your request for abort. Nothing done.\n");
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     } else {
-        sprintf(bigbuf,"Got request for sum!\n");
+        sprintf(bigbuf,"Server got your request for a sum!\n");
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     }
     //Make sure we were able to write to the socket.

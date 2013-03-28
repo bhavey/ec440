@@ -23,8 +23,8 @@ int main(int argc, char *argv[]) {
     char outbuf[BUF_SIZE]="0";
 
     if (argc < 3) {
-        fprintf(stderr,"usage %s hostname port\n", argv[0]);
-        exit(0);
+        argv[1]="127.0.0.1"; //default!
+        argv[2]="1234";
     }
     portno = atoi(argv[2]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
                 if (tmpbuf[j]!='0') //remove leading zeros.
                     j++;
             }
-            if (buffer[i]==' ') {
+            if (buffer[i]==' ') { //split up numbers
                 tmpbuf[j]='\0';
                 if (strlen(tmpbuf)>0)
                     sprintf(outbuf,"%s %s",outbuf,tmpbuf);
