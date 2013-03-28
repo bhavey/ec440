@@ -8,8 +8,11 @@
 #include <time.h>
 #include "thread_run.c"
 #include "error.h"
+#include "server.h"
 
 #define BUF_SIZE 65536
+
+struct ext_struct sum_struct;
 
 void error(const char*);
 void *thread_run(void * arg);
@@ -26,8 +29,7 @@ int main(int argc, char *argv[]) {
 
     //Checks to see if there was a provided port.
     if (argc < 2) {
-        fprintf(stderr,"ERROR, no port provided\n");
-        exit(1);
+        argv[1]="1234"; //Default port!
     }
 
     //Create a socket descriptor, confirm it's created.

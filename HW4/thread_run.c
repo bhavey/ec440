@@ -1,4 +1,3 @@
-
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdlib.h>
+#include "server.h"
 
 #ifndef BUF_SIZE
 #define BUF_SIZE 65536
@@ -18,7 +18,8 @@ void *thread_run(void *arg) {
     char buffer[BUF_SIZE];
     char bigbuf[BUF_SIZE];
     int i, n, newsockfd;
-    int dmesg;
+    int abort;
+    int addvars[10000];
     //copy over the client handler
     newsockfd = *(unsigned int *)arg;
 
@@ -26,61 +27,28 @@ void *thread_run(void *arg) {
     bzero(buffer,BUF_SIZE);
 
     //Read in the buffer.
-    n = read(newsockfd,buffer,255);
+    n = read(newsockfd,buffer,BUF_SIZE);
     //Error reading :/
     if (n<0) {
         error("ERROR reading from socket");
         close(newsockfd);
     }
 
-    //This checks if a call is being made for dmesg or for ftp print.
-    if ((strncmp(buffer,"dmesg",5)==0) && ((int)strlen(buffer)==6)) {
-        //Calling for dmesg.
-        dmesg=1;
-        printf("Got a request for dmesg.\n");
-    } else { //Call for an FTP print.
-        dmesg=0;
-        printf("Got a request for an FTP print.\n");
+    //This checks if a call is being made for ABORT or for sum.
+    if ((strcmp(buffer,"ABORT")==0)) {
+        abort=1; //called for abort
+        printf("Got a request for Abort, add nothing, print abort message...\n");
+    } else { //Call for a sum.
+        abort=0;
+        printf("Got a request for a sum.\n");
     }
+    printf("String: %s\n",buffer);
 
-    if (dmesg) { //execute dmesg.
-        pid_t pid;
-        char *tailCmd[] = {"tail","-n","30","/var/log/kernel.log",0}; //Equiv to dmesg
-
-        if ((pid = fork()) < 0) //Fork Error
-            printf("Error Forking\n",sizeof("Error Forking\n"));
-        else if (pid ==  0) { //child process! Run that shit.
-            setbuf(stdout, bigbuf); //stdout goes to bigbuf now.
-            execvp(tailCmd[0],tailCmd); //Now run dmesg clone command!
-        } else { //Parent process.
-            fclose(stdout);
-            pid_t childPid;
-            int status;
-            childPid = wait(&status); //wait for tail to finish.
-        }
-      n = write(newsockfd,bigbuf,sizeof(bigbuf));
+    if (abort) { //execute abort request, send nothing to client.
+        sprintf(bigbuf,"Recieved your request for abort. Nothing done.\n");
+        n = write(newsockfd,bigbuf,sizeof(bigbuf));
     } else {
-        pid_t pid;
-        char *writeCmd[] = {"/bin/bash","write_message.sh",buffer,0}; //Equiv to dmesg
-        char *ftpCmd[] = {"/bin/bash","ftp.sh",0}; //Equiv to dmesg
-        if ((pid = fork()) < 0) //Fork Error
-            printf("Error Forking\n",sizeof("Error Forking\n"));
-        else if (pid ==  0) { //child process! Run that shit.
-            execvp(writeCmd[0],writeCmd); //Now run dmesg clone command!
-        } else { //Parent process.
-            pid_t childPid;
-            int status;
-            childPid = wait(&status); //wait for tail to finish.
-        }
-        if ((pid = fork()) < 0) //Fork Error
-            printf("Error Forking\n",sizeof("Error Forking\n"));
-        else if (pid ==  0) { //child process! Run that shit.
-            execvp(ftpCmd[0],ftpCmd); //Now run dmesg clone command!
-        } else { //Parent process.
-            pid_t childPid;
-            int status;
-            childPid = wait(&status); //wait for tail to finish.
-        }
+        sprintf(bigbuf,"Got request for sum!\n");
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     }
     //Make sure we were able to write to the socket.
