@@ -57,7 +57,6 @@ void *thread_run(void *arg) {
         i=0;
         pch = strtok(buffer, " ");
         while (pch != NULL) {
-            printf("%s, ",pch);
             addvals[i]=atoi(pch);
             i++;
             pch = strtok (NULL, " ");
@@ -67,8 +66,7 @@ void *thread_run(void *arg) {
         for (i=0; i<tot_vals; i++)
             small_sum+=addvals[i];
         sum_struct.sum+=small_sum;
-        printf("\n");
-        sprintf(bigbuf,"Server got your request for a sum!\n");
+        sprintf(bigbuf,"Your sum: %d\nThe current Grand Total is %d and I have served %d clients so far.",small_sum,sum_struct.sum,sum_struct.client_calls);
         n = write(newsockfd,bigbuf,sizeof(bigbuf));
     }
     printf("Sum: %d\n",sum_struct.sum);
