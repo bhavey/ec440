@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
     pthread_t threads;
     unsigned int ids;
 
+    sum_struct.sum=1;
     int sockfd, newsockfd, portno;
     socklen_t clilen;
     char buffer[BUF_SIZE];
@@ -64,6 +65,7 @@ int main(int argc, char *argv[]) {
             ids = newsockfd;
             pthread_create(&threads,&attr,thread_run,&ids);
        }
+       printf("Sum: %d\n",sum_struct.sum);
     }
     close(newsockfd);
     close(sockfd);
