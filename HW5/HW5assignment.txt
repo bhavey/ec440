@@ -1,4 +1,4 @@
-  This is a two part homework that ends with you writing a kernel module that is a driver for a 'device' that uses the GPIO pins.
+  Tis is a two part homework that ends with you writing a kernel module that is a driver for a 'device' that uses the GPIO pins.
 
     [Due Friday April 5th] Write a kernel module that acts as a driver for a new device that holds a a banner string of no more than 31 characters.  Reading from the device will return the banner string.  Writing to the device will set the banner string characters.  The banner string should be preserved after a writer closes the device so that another later reader will retrieve it.
 
