@@ -1,0 +1,7 @@
+  This is a two part homework that ends with you writing a kernel module that is a driver for a 'device' that uses the GPIO pins.
+
+    [Due Friday April 5th] Write a kernel module that acts as a driver for a new device that holds a a banner string of no more than 31 characters.  Reading from the device will return the banner string.  Writing to the device will set the banner string characters.  The banner string should be preserved after a writer closes the device so that another later reader will retrieve it.
+
+
+    [Due Friday April 12th] Write a device driver for a morse code transmitter device.  The device should use a GPIO pin whose high and low signals represent the Morse code transmission (these might easily be connected to an LED for output).  Writing a character to the device should send that character as Morse code.
+       * Remember that the morse code has to be readable by humans -- who are much slower that the CPU.  So you need to use a timer.
