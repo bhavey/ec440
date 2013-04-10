@@ -158,6 +158,9 @@ device_write(struct file *file,
  * calling process), the ioctl call returns the output of this function.
  *
  */
+
+
+
 int device_ioctl(struct inode *inode,	/* see include/linux/fs.h */
 		 struct file *file,	/* ditto */
 		 unsigned int ioctl_num,	/* number and param for ioctl */
@@ -271,8 +274,6 @@ int init_module()
  */
 void cleanup_module()
 {
-	int ret;
-
 	/* 
 	 * Unregister the device 
 	 */
