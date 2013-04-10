@@ -1,5 +1,9 @@
 Run "make"
 
+*NOTE* kernel messages don't appear to work for TTY config in Ubuntu, they pop
+up on the user's console, but you're in su mode the whole time. Bypass this
+by running 'dmesg | tail -n 30'
+
 Usage:
 satan# insmod hello-5.ko mystring="bebop" mybyte=255 myintArray=-1
 mybyte is an 8 bit integer: 255
