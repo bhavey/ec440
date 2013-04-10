@@ -120,10 +120,11 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
  * If the ioctl is write or read/write (meaning output is returned to the
  * calling process), the ioctl call returns the output of this function. */
 
-int device_ioctl(struct inode *inode, //see /usr/include/linux/fs.h
-                 struct file *file,
-                 unsigned int ioctl_num, //number and param for ioctl
-                 unsigned long ioctl_param) {
+//This function call needed to be changed to conform to new ioctl header
+static long device_ioctl(struct file *file, //see /user/include/linux/fs.h
+    unsigned int ioctl_num, //number and param for ioctl
+    unsigned long ioctl_param) {
+
     int i;
     char *temp;
     char ch;
