@@ -59,9 +59,14 @@ int init_module(void) {
 //This function is called when the module is unloaded
 void cleanup_module(void) {
     //Unregister the device
-    int ret = unregister_chrdev(Major, DEVICE_NAME);
-    if (ret < 0)
-        printk(KERN_ALERT "Error in unregister_chrdev: %d\n", ret);
+//    int ret = unregister_chrdev(Major, DEVICE_NAME);
+    //Converted. This way the kernel is directed to two non-existent
+    //load/unload functions. Could implement them but I'm using
+    //init_module and cleanup_module anyway so just remove those
+    //module_init/_exit calls.
+    unregister_chrdev(Major, DEVICE_NAME); //Converted
+//    if (ret < 0)
+//        printk(KERN_ALERT "Error in unregister_chrdev: %d\n", ret);
 }
 
 //Methods
