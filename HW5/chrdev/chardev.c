@@ -227,7 +227,8 @@ int device_ioctl(struct inode *inode,	/* see include/linux/fs.h */
 struct file_operations Fops = {
 	.read = device_read,
 	.write = device_write,
-	.ioctl = device_ioctl,
+//	.ioctl = device_ioctl,
+	.unlocked_ioctl = device_ioctl,
 	.open = device_open,
 	.release = device_release,	/* a.k.a. close */
 };
@@ -275,11 +276,14 @@ void cleanup_module()
 	/* 
 	 * Unregister the device 
 	 */
-	ret = unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
+	unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
+//	unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
+//	module_init(start);
+//	module_exit(stop);
 
 	/* 
 	 * If there's an error, report it 
 	 */
-	if (ret < 0)
-		printk(KERN_ALERT "Error: unregister_chrdev: %d\n", ret);
+	//if (ret < 0)
+	//	printk(KERN_ALERT "Error: unregister_chrdev: %d\n", ret);
 }
