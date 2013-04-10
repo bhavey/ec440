@@ -1,13 +1,15 @@
-#include <linux/module.h>
+#include "query_ioctl.h"
 #include <linux/kernel.h>
 #include <linux/version.h>
 #include <linux/fs.h>
+#include <linux/errno.h>
+
+//These aren't coming up!!!
+#include <linux/module.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
-#include <linux/errno.h>
 #include <asm/uaccess.h>
  
-#include "query_ioctl.h"
  
 #define FIRST_MINOR 0
 #define MINOR_CNT 1
