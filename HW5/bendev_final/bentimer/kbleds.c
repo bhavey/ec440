@@ -1,9 +1,7 @@
 //kbleds.c − Blink keyboard leds until the module is unloaded.
 //(modified for 3.7.5)
 //Really cool. If you're using a Mac it just toggles caps locks :D
-#include <linux/sched.h>
-#include <linux/proc_fs.h>
-#include <linux/workqueue.h>
+#include <linux/timer.h>
 #include <linux/module.h>
 #include <linux/configfs.h>
 #include <linux/init.h>
@@ -17,6 +15,7 @@ MODULE_LICENSE("GPL");
 struct timer_list my_timer;
 struct tty_driver *my_driver;
 char kbledstatus = 0;
+bool done_now = 0;
 
 //static void mykmod_work_handler(struct work_struct *w);
 //static struct workqueue_struct *wq = 0;
@@ -53,6 +52,8 @@ static void my_timer_func(unsigned long ptr) {
                 *pstatus = 2;
         	my_timer.expires = jiffies + BLINK_DELAY; //Was blink delay
         	add_timer(&my_timer);
+	} else {
+		done_now=1;
 	}
 }
 
@@ -76,6 +77,10 @@ static int __init kbleds_init(void) {
         my_timer.data = (unsigned long)&kbledstatus;
         my_timer.expires = jiffies + BLINK_DELAY;
         add_timer(&my_timer);
+	while (timer_pending(&my_timer));
+	printk(KERN_ERR "Done!\n");
+//	wait_event_interruptible(data,
+
         return 0;
 }
 static void __exit kbleds_cleanup(void) {
