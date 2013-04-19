@@ -1,8 +1,9 @@
 //kbleds.c − Blink keyboard leds until the module is unloaded.
 //(modified for 3.7.5)
 //Really cool. If you're using a Mac it just toggles caps locks :D
-
-
+#include <linux/sched.h>
+#include <linux/proc_fs.h>
+#include <linux/workqueue.h>
 #include <linux/module.h>
 #include <linux/configfs.h>
 #include <linux/init.h>
@@ -16,6 +17,14 @@ MODULE_LICENSE("GPL");
 struct timer_list my_timer;
 struct tty_driver *my_driver;
 char kbledstatus = 0;
+
+//static void mykmod_work_handler(struct work_struct *w);
+//static struct workqueue_struct *wq = 0;
+//static DECLARE_DELAYED_WORK(mykmod_work, mykmod_work_handler);
+//static unsigned long onesec;
+static void my_timer_func(unsigned long ptr);
+DECLARE_WORK(workq,my_timer_func);
+
 #define BLINK_DELAY   HZ/5
 #define SHORT_DELAY   HZ
 #define ALL_LEDS_ON   0x07
@@ -64,18 +73,18 @@ static int __init kbleds_init(void) {
         my_driver = vc_cons[fg_console].d->port.tty->driver;
         printk(KERN_ERR "kbleds: tty driver magic %x\n", my_driver->magic);
         //Set up the LED blink timer the first time
-        init_timer(&my_timer);
-        my_timer.function = my_timer_func;
-        my_timer.data = (unsigned long)&kbledstatus;
-        my_timer.expires = jiffies + BLINK_DELAY;
-        add_timer(&my_timer);
+//        init_timer(&my_timer);
+//        my_timer.function = my_timer_func;
+//        my_timer.data = (unsigned long)&kbledstatus;
+//        my_timer.expires = jiffies + BLINK_DELAY;
+//        add_timer(&my_timer);
+//        add_timer(&my_timer);
+	schedule_work(&workq);
         return 0;
 }
 static void __exit kbleds_cleanup(void) {
         printk(KERN_ERR "kbleds: unloading...\n");
         del_timer(&my_timer);
-//        (my_driver->ops->ioctl) (vc_cons[fg_console].d->port.tty, KDSETLED,
-//                            RESTORE_LEDS);
 }
 module_init(kbleds_init);
 module_exit(kbleds_cleanup);
