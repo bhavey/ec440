@@ -22,8 +22,6 @@ char kbledstatus = 0;
 //static struct workqueue_struct *wq = 0;
 //static DECLARE_DELAYED_WORK(mykmod_work, mykmod_work_handler);
 //static unsigned long onesec;
-static void my_timer_func(unsigned long ptr);
-DECLARE_WORK(workq,my_timer_func);
 
 #define BLINK_DELAY   HZ/5
 #define SHORT_DELAY   HZ
@@ -73,13 +71,11 @@ static int __init kbleds_init(void) {
         my_driver = vc_cons[fg_console].d->port.tty->driver;
         printk(KERN_ERR "kbleds: tty driver magic %x\n", my_driver->magic);
         //Set up the LED blink timer the first time
-//        init_timer(&my_timer);
-//        my_timer.function = my_timer_func;
-//        my_timer.data = (unsigned long)&kbledstatus;
-//        my_timer.expires = jiffies + BLINK_DELAY;
-//        add_timer(&my_timer);
-//        add_timer(&my_timer);
-	schedule_work(&workq);
+        init_timer(&my_timer);
+        my_timer.function = my_timer_func;
+        my_timer.data = (unsigned long)&kbledstatus;
+        my_timer.expires = jiffies + BLINK_DELAY;
+        add_timer(&my_timer);
         return 0;
 }
 static void __exit kbleds_cleanup(void) {
