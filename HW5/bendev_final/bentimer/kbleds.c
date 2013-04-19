@@ -1,5 +1,7 @@
 //kbleds.c − Blink keyboard leds until the module is unloaded.
 //(modified for 3.7.5)
+//Really cool. If you're using a Mac it just toggles caps locks :D
+
 
 #include <linux/module.h>
 #include <linux/configfs.h>
