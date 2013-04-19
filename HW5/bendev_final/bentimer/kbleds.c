@@ -17,7 +17,7 @@ struct timer_list my_timer;
 struct tty_driver *my_driver;
 char kbledstatus = 0;
 #define BLINK_DELAY   HZ/5
-#define SHORT_DELAY   HZ/1
+#define SHORT_DELAY   HZ
 #define ALL_LEDS_ON   0x07
 #define RESTORE_LEDS  0xFF
 
@@ -36,14 +36,14 @@ char kbledstatus = 0;
 //The blinking function.
 static void my_timer_func(unsigned long ptr) {
         int *pstatus = (int *)ptr;
-        if (*pstatus == ALL_LEDS_ON) {
-                *pstatus = RESTORE_LEDS;
+        if (*pstatus == 0) {
+                *pstatus = 1;
         	printk(KERN_ERR "On\n");
         	my_timer.expires = jiffies + SHORT_DELAY; //Was blink delay
 	        add_timer(&my_timer);
-        } else {
+        } else if (*pstatus == 1) {
                 printk(KERN_ERR "Off\n");
-                *pstatus = ALL_LEDS_ON;
+                *pstatus = 2;
         	my_timer.expires = jiffies + BLINK_DELAY; //Was blink delay
         	add_timer(&my_timer);
 	}
