@@ -39,15 +39,11 @@ static void my_timer_func(unsigned long ptr) {
         if (*pstatus == ALL_LEDS_ON) {
                 *pstatus = RESTORE_LEDS;
         	printk(KERN_ERR "On\n");
-        	(my_driver->ops->ioctl) (vc_cons[fg_console].d->port.tty, KDSETLED,
-                            *pstatus);
         	my_timer.expires = jiffies + SHORT_DELAY; //Was blink delay
 	        add_timer(&my_timer);
         } else {
                 printk(KERN_ERR "Off\n");
                 *pstatus = ALL_LEDS_ON;
-	        (my_driver->ops->ioctl) (vc_cons[fg_console].d->port.tty, KDSETLED,
-                            *pstatus);
         	my_timer.expires = jiffies + BLINK_DELAY; //Was blink delay
         	add_timer(&my_timer);
 	}
@@ -78,8 +74,8 @@ static int __init kbleds_init(void) {
 static void __exit kbleds_cleanup(void) {
         printk(KERN_ERR "kbleds: unloading...\n");
         del_timer(&my_timer);
-        (my_driver->ops->ioctl) (vc_cons[fg_console].d->port.tty, KDSETLED,
-                            RESTORE_LEDS);
+//        (my_driver->ops->ioctl) (vc_cons[fg_console].d->port.tty, KDSETLED,
+//                            RESTORE_LEDS);
 }
 module_init(kbleds_init);
 module_exit(kbleds_cleanup);
