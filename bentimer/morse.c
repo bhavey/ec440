@@ -18,7 +18,6 @@ static char *morse_table[] = {".-","-...","-.-.","-..", //A-D
 MODULE_DESCRIPTION("Example module illustrating the use of Keyboard LEDs.");
 MODULE_LICENSE("GPL");
 struct timer_list my_timer;
-int timer_on = 0;
 struct tty_driver *my_driver;
 char morse_in = 'a';
 char morse_status = 0;
@@ -30,26 +29,28 @@ char morse_status = 0;
 //you want *that* timer to last. As in, you want to always set the LED
 //status for dots/dashes in the space preceeding them
 static void Dit(char morse_in) {
-	printk(KERN_ERR "Morse in: %c\n",morse_in);
-	timer_on=1; //Lock the function.
-	if (morse_table[97-morse_in][0]==".") {
-		morse_status = 6;
+	//Check for end of morse code for the character.
+	if (morse_table[97-morse_in][morse_status/2]==NULL) {
+		morse_status = 11; //No morse code requires more then 11.
+		//turn off the light here!
 		printk(KERN_ERR "We're here!\n");
 	} else {
-	        if (morse_status == 0) {
-			morse_status = 1;
-			printk(KERN_ERR "Dot\n");
-			my_timer.expires = jiffies + SPACE; //Was blink delay
+	        if (morse_status%2==0) { //Run a "space" between dashes/dots
+			morse_status++;
+			//Check what to print now!
+			if (morse_table[97-morse_in][morse_status/2]=='.') {
+				printk(KERN_ERR "Dot\n");
+				my_timer.expires = jiffies + DIT;
+			} else {
+				printk(KERN_ERR "Dash\n");
+				my_timer.expires = jiffies + DAH
+			}
 			add_timer(&my_timer);
-		} else if (morse_status == 1) {
-			morse_status = 2;
-			printk(KERN_ERR "Off\n");
-			my_timer.expires = jiffies + DAH; //Was blink delay
+		} else { //The dot/dash is done, call a space.
+			morse_status++;
+			printk(KERN_ERR "Space\n");
+			my_timer.expires = jiffies + SPACE;
 			add_timer(&my_timer);
-		} else  if (morse_status == 2) {
-			printk(KERN_ERR "Done\n");
-			morse_status = 0;
-			timer_on=2;
 		}
 	}
 }
@@ -61,7 +62,6 @@ static int __init kbleds_init(void) {
         my_timer.data = morse_in;
         my_timer.expires = jiffies + DAH;
         add_timer(&my_timer);
-	printk(KERN_ERR "Got there!\n");
         return 0;
 }
 static void __exit kbleds_cleanup(void) {
