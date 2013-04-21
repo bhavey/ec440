@@ -1,0 +1,60 @@
+[  778.406631]  [<c15cfd9f>] sysenter_do_call+0x12/0x28
+[  778.406632] Code: dd fe ff ff 0f 0b 8d b6 00 00 00 00 8d bc 27 00 00 00 00 55 89 e5 66 66 66 66 90 8b 10 85 d2 75 0a 8b 50 08 e8 aa fd ff ff 5d c3 <0f> 0b 8d b6 00 00 00 00 55 89 e5 57 56 53 83 ec 2c 66 66 66 66 
+[  778.406654] EIP: [<c1055728>] add_timer+0x18/0x20 SS:ESP 0068:ca48ff50
+[  778.406659] ---[ end trace ebca81d2b9b9b7e3 ]---
+[  779.604365] Dot
+[  779.804045] Space
+[  780.204126] Dash
+[  781.408153] Space
+[  781.808155] Done!
+[  875.549628] Improper input. Please give a letter or #
+[  875.549658] ------------[ cut here ]------------
+[  875.549662] kernel BUG at /build/buildd/linux-3.5.0/kernel/timer.c:903!
+[  875.549664] invalid opcode: 0000 [#5] SMP 
+[  875.549667] Modules linked in: bendev(O) vesafb vboxsf(O) snd_intel8x0 snd_ac97_codec ac97_bus snd_pcm snd_seq_midi uvcvideo snd_rawmidi snd_seq_midi_event videobuf2_core videodev microcode videobuf2_vmalloc videobuf2_memops snd_seq psmouse snd_timer snd_seq_device joydev serio_raw snd vboxguest(O) bnep rfcomm soundcore i2c_piix4 ppdev bluetooth snd_page_alloc parport_pc mac_hid lp parport hid_apple hid_generic usbhid hid e1000 ahci libahci
+[  875.549694] 
+[  875.549698] Pid: 4798, comm: bash Tainted: G      D    O 3.5.0-27-generic #46-Ubuntu innotek GmbH VirtualBox
+[  875.549702] EIP: 0060:[<c1055728>] EFLAGS: 00210282 CPU: 0
+[  875.549710] EIP is at add_timer+0x18/0x20
+[  875.549712] EAX: f1a7a200 EBX: 00000001 ECX: 0000029c EDX: c19a0a68
+[  875.549714] ESI: 09cdcc09 EDI: 00000001 EBP: ca509f50 ESP: ca509f50
+[  875.549716]  DS: 007b ES: 007b FS: 00d8 GS: 00e0 SS: 0068
+[  875.549718] CR0: 80050033 CR2: 080b6710 CR3: 0a518000 CR4: 000006f0
+[  875.549735] DR0: 00000000 DR1: 00000000 DR2: 00000000 DR3: 00000000
+[  875.549737] DR6: ffff0ff0 DR7: 00000400
+[  875.549740] Process bash (pid: 4798, ti=ca508000 task=d8ba0cb0 task.ti=ca508000)
+[  875.549741] Stack:
+[  875.549743]  ca509f64 f1a780d5 f1a79198 ca504180 f1a78060 ca509f8c c114fd1c ca509f9c
+[  875.549749]  00000000 00000000 f1a78060 c70b2c18 ca504180 09cdcc09 00000002 ca509fac
+[  875.549754]  c114fffd ca509f9c 00000000 00000000 00000000 00000001 09cdcc09 ca508000
+[  875.549759] Call Trace:
+[  875.549766]  [<f1a780d5>] device_write+0x75/0xc0 [bendev]
+[  875.549770]  [<f1a78060>] ? device_open+0x40/0x40 [bendev]
+[  875.549777]  [<c114fd1c>] vfs_write+0x8c/0x160
+[  875.549781]  [<f1a78060>] ? device_open+0x40/0x40 [bendev]
+[  875.549784]  [<c114fffd>] sys_write+0x3d/0x70
+[  875.549790]  [<c15cfd9f>] sysenter_do_call+0x12/0x28
+[  875.549792] Code: dd fe ff ff 0f 0b 8d b6 00 00 00 00 8d bc 27 00 00 00 00 55 89 e5 66 66 66 66 90 8b 10 85 d2 75 0a 8b 50 08 e8 aa fd ff ff 5d c3 <0f> 0b 8d b6 00 00 00 00 55 89 e5 57 56 53 83 ec 2c 66 66 66 66 
+[  875.549818] EIP: [<c1055728>] add_timer+0x18/0x20 SS:ESP 0068:ca509f50
+[  875.549823] ---[ end trace ebca81d2b9b9b7e4 ]---
+[  876.748686] Dot
+[  876.948784] Space
+[  877.348217] Dash
+[  878.552157] Space
+[  878.952196] Done!
+[ 1224.062005] usb 2-1: USB disconnect, device number 4
+[ 1224.341567] usb 2-1: new full-speed USB device number 6 using ohci_hcd
+[ 1224.572694] usb 2-1: New USB device found, idVendor=05ac, idProduct=8242
+[ 1224.572701] usb 2-1: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+[ 1224.572705] usb 2-1: Product: IR Receiver
+[ 1224.572708] usb 2-1: Manufacturer: Apple Computer, Inc.
+[ 1224.735183] apple 0003:05AC:8242.0005: hiddev0,hidraw0: USB HID v1.11 Device [Apple Computer, Inc. IR Receiver] on usb-0000:00:06.0-1/input0
+[ 1224.741687] usb 2-2: USB disconnect, device number 5
+[ 1225.080380] usb 2-2: new full-speed USB device number 7 using ohci_hcd
+[ 1225.326442] usb 2-2: New USB device found, idVendor=80ee, idProduct=0021
+[ 1225.326448] usb 2-2: New USB device strings: Mfr=1, Product=3, SerialNumber=0
+[ 1225.326451] usb 2-2: Product: USB Tablet
+[ 1225.326453] usb 2-2: Manufacturer: VirtualBox
+[ 1225.339530] input: VirtualBox USB Tablet as /devices/pci0000:00/0000:00:06.0/usb2/2-2/2-2:1.0/input/input8
+[ 1225.339676] hid-generic 0003:80EE:0021.0006: input,hidraw1: USB HID v1.10 Mouse [VirtualBox USB Tablet] on usb-0000:00:06.0-2/input0
+[ 1225.488215] usb 1-1: reset high-speed USB device number 2 using ehci_hcd
