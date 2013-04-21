@@ -3,27 +3,27 @@
 #include <linux/module.h>
 #include <linux/configfs.h>
 #include <linux/init.h>
-#include <linux/tty.h> //For fg_console, MAX_NR_CONSOLES
-#include <linux/kd.h> //For KDSETLED
+#include <linux/tty.h>
 #include <linux/vt.h>
-#include <linux/console_struct.h> //For vc_cons
+#include <linux/console_struct.h>
 #include <linux/vt_kern.h>
 MODULE_DESCRIPTION("Example module illustrating the use of Keyboard LEDs.");
 MODULE_LICENSE("GPL");
 struct timer_list my_timer;
-bool timer_on = 0;
+int timer_on = 0;
 struct tty_driver *my_driver;
-char kbledstatus = 0;
+char morse_status = 0;
 #define DIT HZ/5 //dot
 #define DAH HZ*4/5 //dash
 #define SPACE HZ*2/5 //space
 
 //The dit function.
-static void my_timer_func(unsigned long ptr) {
+static void Dit(unsigned long ptr) {
+	timer_on=1; //Lock the function.
         int *pstatus = (int *)ptr;
         if (*pstatus == 0) {
-                *pstatus = 1;
-		printk(KERN_ERR "On\n");
+		*pstatus = 1;
+		printk(KERN_ERR "Dot\n");
 		my_timer.expires = jiffies + DAH; //Was blink delay
 		add_timer(&my_timer);
 	} else if (*pstatus == 1) {
@@ -31,7 +31,18 @@ static void my_timer_func(unsigned long ptr) {
 		*pstatus = 2;
 		my_timer.expires = jiffies + SPACE; //Was blink delay
 		add_timer(&my_timer);
+	} else  if (*pstatus == 2) {
+		printk(KERN_ERR "Done\n");
+		*pstatus = 0;
+		timer_on=0;
 	}
+}
+static void Dot(unsigned long ptr) {
+
+}
+
+static void Off(unsigned long ptr) {
+
 }
 
 static int __init kbleds_init(void) {
@@ -49,8 +60,8 @@ static int __init kbleds_init(void) {
         my_driver = vc_cons[fg_console].d->port.tty->driver;
         printk(KERN_ERR "kbleds: tty driver magic %x\n", my_driver->magic);
         init_timer(&my_timer);
-        my_timer.function = my_timer_func;
-        my_timer.data = (unsigned long)&kbledstatus;
+        my_timer.function = dit;
+        my_timer.data = (unsigned long)&morse_status;
         my_timer.expires = jiffies + DIT;
         add_timer(&my_timer);
         return 0;
