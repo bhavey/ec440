@@ -1,5 +1,4 @@
 //Morse code LED module for Raspberry Pi
-
 #include <linux/module.h>
 #include <linux/configfs.h>
 #include <linux/init.h>
@@ -36,6 +35,7 @@ static void Dit(unsigned long ptr) {
 		printk(KERN_ERR "Done\n");
 		*pstatus = 0;
 		timer_on=2;
+		printk(KERN_ERR "This is poop\n");
 	}
 }
 //static void Dot(unsigned long ptr) {
@@ -47,30 +47,24 @@ static void Dit(unsigned long ptr) {
 //}
 
 static int __init kbleds_init(void) {
-        int i;
-        printk(KERN_ERR "kbleds: loading\n");
-        printk(KERN_ERR "kbleds: fgconsole is %x\n", fg_console);
-        for (i = 0; i < MAX_NR_CONSOLES; i++) {
-                if (!vc_cons[i].d)
-                        break;
-                printk(KERN_ERR "poet_atkm: console[%i/%i] #%i, tty %lx\n", i,
-                       MAX_NR_CONSOLES, vc_cons[i].d->vc_num,
-                       (unsigned long)vc_cons[i].d->port.tty);
-        }
-        printk(KERN_ERR "kbleds: finished scanning consoles\n");
+	bool this_is_stupid=1;
+        printk(KERN_ERR "morse: loading\n");
         my_driver = vc_cons[fg_console].d->port.tty->driver;
-        printk(KERN_ERR "kbleds: tty driver magic %x\n", my_driver->magic);
         init_timer(&my_timer);
         my_timer.function = Dit;
         my_timer.data = (unsigned long)&morse_status;
         my_timer.expires = jiffies + DIT;
         add_timer(&my_timer);
-	while (timer_on!=2);
+	while (this_is_stupid) {
+		if (timer_on==2)
+			this_is_stupid=0;
+	}
+	this_is_stupid=1;
 	printk(KERN_ERR "Got there!\n");
         return 0;
 }
 static void __exit kbleds_cleanup(void) {
-        printk(KERN_ERR "kbleds: unloading...\n");
+        printk(KERN_ERR "morse: unloading...\n");
         del_timer(&my_timer);
 }
 module_init(kbleds_init);
