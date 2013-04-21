@@ -51,7 +51,7 @@ static void Dit(char morse_in) {
 	if (morse_status == 11)
 		morse_status=0; //Reset morse_status
 	//Check for end of morse code for the character.
-	if (morse_table[morse_in][morse_status/2]==NULL) {
+	if (morse_table[(int)morse_in][morse_status/2]==NULL) {
 		morse_status = 11; //No morse code requires more then 11.
 		//turn off the light here!
 		printk(KERN_ERR "Done!\n");
@@ -59,7 +59,7 @@ static void Dit(char morse_in) {
 	        if (morse_status%2==0) { //Run a "space" between dashes/dots
 			morse_status++;
 			//Check what to print now!
-			if (morse_table[morse_in][morse_status/2]=='.') {
+			if (morse_table[(int)morse_in][morse_status/2]=='.') {
 				printk(KERN_ERR "Dot\n");
 				my_timer.expires = jiffies + DIT;
 			} else {
@@ -157,8 +157,6 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
 
     for (i = 0; i < length && i < BUF_LEN; i++)
         get_user(Message[i], buffer + i);
-
-    Message[1]='\0'; //Terminate!
 
     buff2[0]=' ';
 
@@ -278,14 +276,12 @@ int init_module() {
     printk(KERN_ERR "morse: loading\n");
     init_timer(&my_timer);
     my_timer.function = Dit;
-    my_timer.data = morse_in;
-    my_timer.expires = jiffies + DAH;
-    add_timer(&my_timer);
+//    add_timer(&my_timer);
     return 0;
 }
 
-//Cleanup - unregister the appropriate file from /proc void 
-cleanup_module() {
+//Cleanup - unregister the appropriate file from /proc 
+void cleanup_module() {
     //Unregister the device
     //Had to get rid of the error messages due to changes in the code.
     printk(KERN_ERR "morse: unloading...\n");
