@@ -35,6 +35,7 @@ static void Dit(char morse_in) {
 		my_timer.expires = jiffies + DAH; //Was blink delay
 		add_timer(&my_timer);
 	} else if (morse_status == 1) {
+		morse_status = 2;
 		printk(KERN_ERR "Off\n");
 		my_timer.expires = jiffies + SPACE; //Was blink delay
 		add_timer(&my_timer);
