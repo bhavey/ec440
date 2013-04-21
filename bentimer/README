@@ -1,0 +1,5 @@
+You can load the kernel mod with the following:
+insmod kbleds.ko
+
+It won't stop blinking until you unload it or reboot the system:
+rmmod kbleds
