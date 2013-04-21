@@ -4,6 +4,7 @@
 #include <linux/configfs.h>
 #include <linux/init.h>
 #include <linux/tty.h>
+#include <linux/kd.h>
 #include <linux/vt.h>
 #include <linux/console_struct.h>
 #include <linux/vt_kern.h>
@@ -34,16 +35,16 @@ static void Dit(unsigned long ptr) {
 	} else  if (*pstatus == 2) {
 		printk(KERN_ERR "Done\n");
 		*pstatus = 0;
-		timer_on=0;
+		timer_on=2;
 	}
 }
-static void Dot(unsigned long ptr) {
+//static void Dot(unsigned long ptr) {
 
-}
+//}
 
-static void Off(unsigned long ptr) {
+//static void Off(unsigned long ptr) {
 
-}
+//}
 
 static int __init kbleds_init(void) {
         int i;
@@ -60,10 +61,12 @@ static int __init kbleds_init(void) {
         my_driver = vc_cons[fg_console].d->port.tty->driver;
         printk(KERN_ERR "kbleds: tty driver magic %x\n", my_driver->magic);
         init_timer(&my_timer);
-        my_timer.function = dit;
+        my_timer.function = Dit;
         my_timer.data = (unsigned long)&morse_status;
         my_timer.expires = jiffies + DIT;
         add_timer(&my_timer);
+	while (timer_on!=2);
+	printk(KERN_ERR "Got there!\n");
         return 0;
 }
 static void __exit kbleds_cleanup(void) {
