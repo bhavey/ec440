@@ -1,17 +1,36 @@
-//Modification to program from: http://www.tldp.org/LDP/lkmpg/2.6/html/x892.html
-//bendev.c - Create an input/output character device
-//Most modifications are minor, mostly just changes in the functionality
-//of IO to conform to the modern linux kernel's implementation ioctl
+//Morse code LED module for Raspberry Pi
+static char *morse_table[] = {".-","-...","-.-.","-..", //A-D
+    ".","..-.","--.","....","..",".---","-.-",".-..", //E-L
+    "--","-.","---",".--.","--.-",".-.","...","-","..-", //M-U
+    "...-",".--","-..-","-.--","--..", //V-Z
+    ".----","..---","...--","....-",".....", //1-5
+    "-....","--...","---..","----.","-----", //6-0
+};
 
 #include <linux/kernel.h>	//We're doing kernel work
 #include <linux/module.h>	//on a module
 #include <asm/uaccess.h>	//for get_user and put_user
 #include <linux/fs.h>
+#include <linux/configfs.h>
+#include <linux/init.h>
+#include <linux/tty.h>
+#include <linux/kd.h>
+#include <linux/vt.h>
+#include <linux/console_struct.h>
+#include <linux/vt_kern.h>
+MODULE_DESCRIPTION("Example module illustrating the use of Keyboard LEDs.");
+MODULE_LICENSE("GPL");
+struct timer_list my_timer;
+char morse_in = 'a';
+char morse_status = 11;
+#define DIT HZ/5 //dot
+#define DAH HZ*6/5 //dash
+#define SPACE HZ*2/5 //space
 
 #include "bendev.h"
 #define SUCCESS 0
 #define DEVICE_NAME "ben_dev"
-#define BUF_LEN 31 //Buffer size is 31 characters!
+#define BUF_LEN 1 //Buffer size is 31 characters!
 
 //Is the device open right now? Used to prevent
 //concurent access into the same device
@@ -24,6 +43,38 @@ static char Message[BUF_LEN];
  * Useful if the message is larger than the size of the
  * buffer we get to fill in device_read. */
 static char *Message_Ptr;
+
+//Note. Each time you set up a new timer, you need to consider how long
+//you want *that* timer to last. As in, you want to always set the LED
+//status for dots/dashes in the space preceeding them
+static void Dit(char morse_in) {
+	if (morse_status == 11)
+		morse_status=0; //Reset morse_status
+	//Check for end of morse code for the character.
+	if (morse_table[morse_in][morse_status/2]==NULL) {
+		morse_status = 11; //No morse code requires more then 11.
+		//turn off the light here!
+		printk(KERN_ERR "Done!\n");
+	} else {
+	        if (morse_status%2==0) { //Run a "space" between dashes/dots
+			morse_status++;
+			//Check what to print now!
+			if (morse_table[morse_in][morse_status/2]=='.') {
+				printk(KERN_ERR "Dot\n");
+				my_timer.expires = jiffies + DIT;
+			} else {
+				printk(KERN_ERR "Dash\n");
+				my_timer.expires = jiffies + DAH;
+			}
+			add_timer(&my_timer);
+		} else { //The dot/dash is done, call a space.
+			morse_status++;
+			printk(KERN_ERR "Space\n");
+			my_timer.expires = jiffies + SPACE;
+			add_timer(&my_timer);
+		}
+	}
+}
 
 //This is called whenever a process attempts to open the device file
 static int device_open(struct inode *inode, struct file *file) {
@@ -107,14 +158,31 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
     for (i = 0; i < length && i < BUF_LEN; i++)
         get_user(Message[i], buffer + i);
 
-    Message[i]='\0'; //Terminate!
-    for (i = 0; i < 31; i++)
-        buff2[i]=' ';
+    Message[1]='\0'; //Terminate!
 
-//    Message_Ptr = "\0";
+    buff2[0]=' ';
+
     Message_Ptr = buff2;
     Message_Ptr = Message;
 
+    if (morse_status!=11)
+	printk(KERN_ERR "Device busy.\n");
+    else {
+	//Check if accurate input!
+	morse_in=Message[0];
+	if ((morse_in>=48)&&(morse_in<=57)) {
+	    //Number. Move to the proper index!
+	    morse_in-=22;
+	} else if ((morse_in>=65)&&(morse_in<=90)) {
+	    morse_in-=65; //Adjust the indices for capital letters.
+	} else if ((morse_in>=97)&&(morse_in<=122)) {
+	    morse_in-=97; //Adjust the indices for lower letters.
+	} else {
+	    printk(KERN_ERR "Improper input. Please give a letter or #\n");
+	}
+	my_timer.expires = jiffies + DAH;
+	add_timer(&my_timer);
+    }
     //Again, return the number of input characters used
     return i;
 }
@@ -207,16 +275,24 @@ int init_module() {
     printk(KERN_ERR "mknod %s c %d MINOR_NUM\n", DEVICE_FILE_NAME, MAJOR_NUM);
     printk(KERN_ERR "Write to device with 'echo WORDS > %s.\n",DEVICE_FILE_NAME);
     printk(KERN_ERR "Read with 'cat %s\n",DEVICE_FILE_NAME);
+    printk(KERN_ERR "morse: loading\n");
+    init_timer(&my_timer);
+    my_timer.function = Dit;
+    my_timer.data = morse_in;
+    my_timer.expires = jiffies + DAH;
+    add_timer(&my_timer);
     return 0;
 }
 
-//Cleanup - unregister the appropriate file from /proc
-void cleanup_module() {
+//Cleanup - unregister the appropriate file from /proc void 
+cleanup_module() {
     //Unregister the device
     //Had to get rid of the error messages due to changes in the code.
+    printk(KERN_ERR "morse: unloading...\n");
+    del_timer(&my_timer);
     unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
 }
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Benjamin Havey, Sourced from Anil Kumar Pugalia");
-MODULE_DESCRIPTION("Banner message Driver");
+//MODULE_LICENSE("GPL");
+//MODULE_AUTHOR("Benjamin Havey, Sourced from Anil Kumar Pugalia");
+//MODULE_DESCRIPTION("Banner message Driver");
