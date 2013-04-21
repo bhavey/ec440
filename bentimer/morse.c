@@ -38,27 +38,16 @@ static void Dit(unsigned long ptr) {
 		printk(KERN_ERR "This is poop\n");
 	}
 }
-//static void Dot(unsigned long ptr) {
-
-//}
-
-//static void Off(unsigned long ptr) {
-
-//}
 
 static int __init kbleds_init(void) {
 	bool this_is_stupid=1;
         printk(KERN_ERR "morse: loading\n");
+        my_driver = vc_cons[fg_console].d->port.tty->driver;
         init_timer(&my_timer);
         my_timer.function = Dit;
         my_timer.data = (unsigned long)&morse_status;
         my_timer.expires = jiffies + DIT;
         add_timer(&my_timer);
-//	while (this_is_stupid) {
-//		if (timer_on==2)
-//			this_is_stupid=0;
-//			printk(KERN_ERR "WTF\n");
-//	}
 	this_is_stupid=1;
 	printk(KERN_ERR "Got there!\n");
         return 0;
