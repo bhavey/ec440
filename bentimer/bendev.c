@@ -149,8 +149,6 @@ static ssize_t device_read(struct file *file, //see include/linux/fs.h
 //write into our device file.
 static ssize_t device_write(struct file *file, const char __user * buffer,
     size_t length, loff_t * offset) {
-    int i;
-    char buff2[BUF_LEN];
 
 #ifdef DEBUG
     printk(KERN_ERR "device_write(%p,%s,%d)", file, buffer, length);
@@ -158,11 +156,12 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
 
 //    for (i = 0; i < length && i < BUF_LEN; i++)
 //        get_user(Message[i], buffer + i);
-
+    printk(KERN_ERR "Message before get user: %c\n",Message[0]);
+    get_user(Message[0], buffer);
+    printk(KERN_ERR "Buffer reads as: %c\n",buffer);
+    printk(KERN_ERR "Message after get user: %c\n",Message[0]);
     Message[0]=buffer;
-    buff2[0]='\0';
 
-    Message_Ptr = buff2;
     Message_Ptr = Message;
 
     if (morse_status!=11)
@@ -184,8 +183,7 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
 	my_timer.expires = jiffies + DAH;
 	add_timer(&my_timer);
     }
-    //Again, return the number of input characters used
-    return i;
+    return 0;
 }
 
  /* This function is called whenever a process tries to do an ioctl on our
