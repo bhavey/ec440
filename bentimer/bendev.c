@@ -47,7 +47,7 @@ static char *Message_Ptr;
 //Note. Each time you set up a new timer, you need to consider how long
 //you want *that* timer to last. As in, you want to always set the LED
 //status for dots/dashes in the space preceeding them
-static void Dit(char morse_in) {
+static void Dit(unsigned long poop) {
 	
 	if (morse_status == 11)
 		morse_status=0; //Reset morse_status
@@ -184,7 +184,7 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
 	add_timer(&my_timer);
     }
     //Again, return the number of input characters used
-    return i;
+    return 1;
 }
 
  /* This function is called whenever a process tries to do an ioctl on our
