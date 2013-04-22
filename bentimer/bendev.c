@@ -48,9 +48,10 @@ static char *Message_Ptr;
 //you want *that* timer to last. As in, you want to always set the LED
 //status for dots/dashes in the space preceeding them
 static void Dit(unsigned long poop) {
-	
-	if (morse_status == 11)
+	if (morse_status == 11) {
+		printk(KERN_ERR "Morse_in: %c\n",morse_in);
 		morse_status=0; //Reset morse_status
+	}
 	//Check for end of morse code for the character.
 	if (!morse_table[(int)morse_in][morse_status/2]) {
 		morse_status = 11; //No morse code requires more then 11.
@@ -117,9 +118,6 @@ static ssize_t device_read(struct file *file, //see include/linux/fs.h
     //Number of bytes actually written to the buffer
     int bytes_read = 0;
 
-#ifdef DEBUG
-    printk(KERN_ERR "device_read(%p,%p,%d)\n", file, buffer, length);
-#endif
     //If we're at the end of the message, return 0
     //(which signifies end of file)
     if (*Message_Ptr == 0)
@@ -149,27 +147,19 @@ static ssize_t device_read(struct file *file, //see include/linux/fs.h
 //write into our device file.
 static ssize_t device_write(struct file *file, const char __user * buffer,
     size_t length, loff_t * offset) {
-    char buff2[BUF_LEN];
 
-#ifdef DEBUG
-    printk(KERN_ERR "device_write(%p,%s,%d)", file, buffer, length);
-#endif
 
+    if (morse_status!=11) {
+	printk(KERN_ERR "Device busy.\n");
+    } else {
 	printk(KERN_ERR "Message before get_user: %c\n",Message[0]);
 	get_user(Message[0], buffer);
 	printk(KERN_ERR "Message after get_user: %c\n",Message[0]);
-    buff2[0]=' ';
 
 	morse_in=Message[0];
 	printk(KERN_ERR "Morse_in: %c\n",Message[0]);
-    Message_Ptr = buff2;
-    Message_Ptr = Message;
-
-    if (morse_status!=11)
-	printk(KERN_ERR "Device busy.\n");
-    else {
+	Message_Ptr = Message;
 	//Check if accurate input!
-//	morse_in=Message[0];
 	if ((morse_in>=48)&&(morse_in<=57)) {
 	    //Number. Move to the proper index!
 	    morse_in-=22;
@@ -275,7 +265,6 @@ int init_module() {
     printk(KERN_ERR "mknod %s c %d MINOR_NUM\n", DEVICE_FILE_NAME, MAJOR_NUM);
     printk(KERN_ERR "Write to device with 'echo WORDS > %s.\n",DEVICE_FILE_NAME);
     printk(KERN_ERR "Read with 'cat %s\n",DEVICE_FILE_NAME);
-    printk(KERN_ERR "morse: loading\n");
     init_timer(&my_timer);
     my_timer.function = Dit;
 //    add_timer(&my_timer);
