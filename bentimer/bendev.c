@@ -174,7 +174,7 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
 	add_timer(&my_timer);
     }
     //Again, return the number of input characters used
-    return 1;
+    return length;
 }
 
  /* This function is called whenever a process tries to do an ioctl on our
