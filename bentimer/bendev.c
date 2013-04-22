@@ -163,6 +163,7 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
     Message[0]=buffer;
 
     Message_Ptr = Message;
+    my_timer.function = Dit;
 
     if (morse_status!=11)
 	printk(KERN_ERR "Device busy.\n");
@@ -276,8 +277,7 @@ int init_module() {
     printk(KERN_ERR "Read with 'cat %s\n",DEVICE_FILE_NAME);
     printk(KERN_ERR "morse: loading\n");
     init_timer(&my_timer);
-    my_timer.function = Dit;
-//    add_timer(&my_timer);
+    my_timer.data = morse_in;
     return 0;
 }
 
