@@ -48,10 +48,11 @@ static char *Message_Ptr;
 //you want *that* timer to last. As in, you want to always set the LED
 //status for dots/dashes in the space preceeding them
 static void Dit(char morse_in) {
-	if (morse_status == 11)
+	if (morse_status == 11) {
+		printk(KERN_ERR "morse_in: %c\n",morse_in);
 		morse_status=0; //Reset morse_status
 	//Check for end of morse code for the character.
-	if (morse_table[(int)morse_in][morse_status/2]==NULL) {
+	} if (morse_table[(int)morse_in][morse_status/2]==NULL) {
 		morse_status = 11; //No morse code requires more then 11.
 		//turn off the light here!
 		printk(KERN_ERR "Done!\n");
@@ -155,10 +156,11 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
     printk(KERN_ERR "device_write(%p,%s,%d)", file, buffer, length);
 #endif
 
-    for (i = 0; i < length && i < BUF_LEN; i++)
-        get_user(Message[i], buffer + i);
+//    for (i = 0; i < length && i < BUF_LEN; i++)
+//        get_user(Message[i], buffer + i);
 
-    buff2[0]=' ';
+    Message[0]=buffer;
+    buff2[0]='\0';
 
     Message_Ptr = buff2;
     Message_Ptr = Message;
@@ -168,6 +170,7 @@ static ssize_t device_write(struct file *file, const char __user * buffer,
     else {
 	//Check if accurate input!
 	morse_in=Message[0];
+	printk(KERN_ERR "Writing message in: %c\n", Message[0]);
 	if ((morse_in>=48)&&(morse_in<=57)) {
 	    //Number. Move to the proper index!
 	    morse_in-=22;
